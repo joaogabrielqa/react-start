@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { Component } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-const App = () => (
-  <div>
-    <h1>O React está funcionando!!</h1>
-  </div>
-);
+import Footer from './Footer';
+import Navbar from './Navbar';
+import Routes from '../main/Routes';
 
-export default App;
+export default class App extends Component{
+    render(){
+        return(
+            <Router>
+                <div>
+                    <Navbar />
+                    <Routes />
+                    <Footer />
+                </div>
+            </Router>
+        );
+    }
+}

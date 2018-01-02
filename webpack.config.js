@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const { resolve } = require('path');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: [
@@ -14,7 +15,13 @@ module.exports = {
     },
     devtool: 'source-map', // Mapeamento para facilitar a busca de problemas no código
     resolve: {
-        extensions: ['*', '.js', '.jsx'] // Extensões buscadas pelo webpack
+        extensions: ['*', '.js', '.jsx'], // Extensões buscadas pelo webpack
+        alias: {
+            modules: __dirname + '/node_modules',
+            jquery: 'modules/jquery/dist/jquery.min.js',
+            bootstrap: 'modules/bootstrap/dist/js/bootstrap.min.js',
+            tether: 'modules/tether/dist/js/tether.min.js'
+        }
     },
     stats: { // Opções de saída do webpack
         colors: true,
@@ -31,54 +38,34 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: [
-                    'style-loader',
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                            modules: true,
-                            importLoaders: 1,
-                            localIndentName: '[name]__[local]__[hash:base64:5]',
-                            url: false
-                        }
-                    },
-                    {
-                        loader: 'postcss-loader',
-                        options: {
-                            plugins: function() {
-                                return [require('autoprefixer')];
-                            }
-                        }
-                    }
-                ]
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader']
+                })
             },
             {
                 test: /\.scss$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: [
+                        {
+                            loader: 'css-loader'
+                        },
+                        {
+                            loader: "sass-loader"
+                        }
+                    ]
+                })
+            },
+            {
+                test: /\.(png|jpg|gif)$/,
                 use: [
-                    'style-loader',
                     {
-                        loader: 'css-loader',
+                        loader: 'file-loader',
                         options: {
-                            sourceMap: true,
-                            modules: true,
-                            importLoaders: 2,
-                            localIndentName: '[name]__[local]__[hash:base64:5]',
-                            url: false
+                            name: '[path][name].[ext]',
+                            outputPath: 'public/'
                         }
-                    },
-                    {
-                        loader: 'postcss-loader',
-                        options: {
-                            plugins: function() {
-                                return [
-                                    require('autoprefixer')
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        loader: "sass-loader"
                     }
                 ]
             }
@@ -91,6 +78,13 @@ module.exports = {
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.NamedModulesPlugin()
+        new webpack.NamedModulesPlugin(),
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery',
+            'window.jQuery': 'jquery',
+            'Tether': 'tether'
+        }),
+        new ExtractTextPlugin('app.css')
     ]
 };
